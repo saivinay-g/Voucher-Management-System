@@ -9,8 +9,10 @@ import java.util.List;
 
 @Service
 public class VoucherService {
+
     @Autowired
     private VoucherRepo repo;
+
     public Voucher addOrUpdateVoucher(Voucher voucher) {
         return repo.save(voucher);
     }
@@ -20,37 +22,40 @@ public class VoucherService {
     }
 
     public String isValid(String voucher) {
-        boolean res = Boolean.parseBoolean(repo.findByVoucherAvailable(voucher));
-        if(res){
-            return "Valid";
-        }
-        return "InValid";
+        return Boolean.TRUE.equals(repo.findByVoucherAvailable(voucher))
+                ? "Valid"
+                : "Invalid";
     }
 
-    public Voucher getByVoucherCode(String vcode){
+    public Voucher getByVoucherCode(String vcode) {
         return repo.findByVcode(vcode);
     }
 
     public String claimVoucher(String voucher) {
-        if(isValid(voucher).equals("Valid")){
 
-            Voucher v = repo.findByVcode(voucher);
-            v.setClaimLimit(v.getClaimLimit()-1);
-            if(v.getClaimLimit()==0){
-                v.setActive(false);
-            }
-            repo.save(v);
-            return "Claimed Successfully";
+        Voucher v = repo.findByVcode(voucher);
+        if (v == null || !v.isActive() || v.getClaimLimit() <= 0) {
+            return "Voucher is not valid";
         }
-        return "Voucher is not valid";
+
+        v.setClaimLimit(v.getClaimLimit() - 1);
+
+        if (v.getClaimLimit() == 0) {
+            v.setActive(false);
+        }
+
+        repo.save(v);
+        return "Claimed Successfully";
     }
 
     public String deleteVoucher(String vcode) {
-        Voucher voucher = getByVoucherCode(vcode);
-        repo.delete(voucher);
-        if(voucher.getVid()>0){
-            return "Successfully Deleted";
+        Voucher voucher = repo.findByVcode(vcode);
+
+        if (voucher == null) {
+            return "Voucher Not Found";
         }
-        return "Voucher Not Found";
+
+        repo.delete(voucher);
+        return "Successfully Deleted";
     }
 }

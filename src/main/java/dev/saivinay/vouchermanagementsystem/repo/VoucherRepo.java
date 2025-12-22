@@ -7,9 +7,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface VoucherRepo extends JpaRepository<Voucher, Integer> {
-    @Query("SELECT v.isActive FROM Voucher v WHERE v.vcode=:voucher")
-    String findByVoucherAvailable(String voucher);
 
-    @Query("SELECT v FROM Voucher v WHERE v.vcode=:vcode")
+    @Query("SELECT v.isActive FROM Voucher v WHERE v.vcode = :voucher")
+    Boolean findByVoucherAvailable(String voucher);
+
     Voucher findByVcode(String vcode);
 }
+
